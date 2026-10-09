@@ -53,7 +53,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        if (storedToken) setToken(storedToken);
+        if (storedToken) {
+          try {
+            const verifyRes = await fetch('/api/auth/verify', {
+              headers: {
+                'Authorization': `Bearer ${storedToken}`
+              }
+            });
+            if (verifyRes.ok) {
+              setToken(storedToken);
+            } else {
+              // Token is invalid, license deleted or suspended
+              localStorage.removeItem('userToken');
+              setToken(null);
+            }
+          } catch (err) {
+            console.error("Token verification failed (network issue):", err);
+            // If network fails, we could either let them in or block them. 
+            // Usually, letting them in using the cached token is better for offline PWA support,
+            // but for strict license checks, we might want to block or at least log.
+            // Let's allow them in if it's just a network failure, they'll be blocked next time they are online.
+            setToken(storedToken);
+          }
+        }
       } catch (error) {
         console.error("Auth context error:", error);
       } finally {
