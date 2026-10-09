@@ -17,7 +17,8 @@ export function CalculatorForm({ onCalculate }: Props) {
     if (!date) return;
 
     const dateObj = new Date(date);
-    const skyEyeData = getSkyEyeResult(dateObj, timeSlotId);
+    const dayIndex = dateObj.getDay();
+    const skyEyeData = getSkyEyeResult(dayIndex, timeSlotId);
 
     onCalculate({
       skyEyeData,

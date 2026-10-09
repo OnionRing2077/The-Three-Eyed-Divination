@@ -81,11 +81,10 @@ import DETAILED_MEANINGS from './sky_eye_detailed_meanings.json';
 
 /**
  * ฟังก์ชันสำหรับหาผลลัพธ์ของ "ตาฟ้า" โดยอ้างอิงจาก วันที่ และ เวลา
- * @param date วันที่ที่ต้องการคำนวณ (เพื่อหาวันในสัปดาห์ 0-6)
+ * @param dayIndex วันในสัปดาห์ 0-6 (0 = อาทิตย์, ... 6 = เสาร์)
  * @param timeSlotId หมายเลขยาม (1-12)
  */
-export function getSkyEyeResult(date: Date, timeSlotId: number): { status: SkyEyeStatus; meaning: any; detailedMeaning: any } {
-  const dayIndex = date.getDay(); // 0 = Sunday, 1 = Monday, ...
+export function getSkyEyeResult(dayIndex: number, timeSlotId: number): { status: SkyEyeStatus; meaning: any; detailedMeaning: any } {
   const slotIndex = timeSlotId - 1; // Array index 0-11
   
   const status = SKY_EYE_MATRIX[dayIndex][slotIndex];

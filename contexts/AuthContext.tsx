@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 interface AuthContextType {
   token: string | null;
@@ -20,19 +19,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const loadAuth = () => {
-      // 1. ตรวจสอบหรือสร้าง Device ID
-      let storedDeviceId = localStorage.getItem('deviceId');
-      if (!storedDeviceId) {
-        storedDeviceId = uuidv4();
-        localStorage.setItem('deviceId', storedDeviceId);
-      }
-      setDeviceId(storedDeviceId);
+      try {
+        // 1. ตรวจสอบหรือสร้าง Device ID
+        let storedDeviceId = localStorage.getItem('deviceId');
+        if (!storedDeviceId) {
+          storedDeviceId = 'device-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10);
+          localStorage.setItem('deviceId', storedDeviceId);
+        }
+        setDeviceId(storedDeviceId);
 
-      // 2. โหลด Token เก่าถ้ามี
-      const storedToken = localStorage.getItem('userToken');
-      if (storedToken) setToken(storedToken);
-      
-      setIsLoading(false);
+        // 2. โหลด Token เก่าถ้ามี
+        const storedToken = localStorage.getItem('userToken');
+        if (storedToken) setToken(storedToken);
+      } catch (error) {
+        console.error("Auth context error:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadAuth();
   }, []);

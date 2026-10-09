@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getSkyEyeResult, TIME_SLOTS, STATUS_THAI, STATUS_COLORS, DAYS_THAI } from "@/lib/sky_eye_data";
-import { Clock, Briefcase, CircleDollarSign, Plane, Store, HeartPulse, Heart, Scale } from "lucide-react";
+import { Clock, Briefcase, CircleDollarSign, Plane, Store, HeartPulse, Heart, Scale, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
 // Mindora-inspired status colors (softer, nature-toned) -> Updated for Dark Theme (Gold/White)
@@ -28,6 +28,7 @@ const getCategoryIcon = (cat: string) => {
 
 export function CurrentTimeStatus() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [slotOffset, setSlotOffset] = useState<number>(0);
 
   useEffect(() => {
     setCurrentTime(new Date());
@@ -39,12 +40,19 @@ export function CurrentTimeStatus() {
 
   if (!currentTime) return null;
 
-  const hours = currentTime.getHours();
+  const baseTime = new Date(currentTime.getTime() + slotOffset * 2 * 60 * 60 * 1000);
+  const hours = baseTime.getHours();
   const slotId = Math.floor(((hours + 18) % 24) / 2) + 1;
   const timeSlot = TIME_SLOTS.find(t => t.id === slotId);
 
-  const resultData = getSkyEyeResult(currentTime, slotId);
-  const dayName = DAYS_THAI[currentTime.getDay()];
+  // Astrological day starts at 06:00
+  let astroDayIndex = baseTime.getDay();
+  if (hours < 6) {
+    astroDayIndex = (astroDayIndex + 6) % 7;
+  }
+
+  const resultData = getSkyEyeResult(astroDayIndex, slotId);
+  const dayName = DAYS_THAI[astroDayIndex];
   const thaiName = STATUS_THAI[resultData.status as keyof typeof STATUS_THAI];
   const colorClass = MINDORA_STATUS_COLORS[resultData.status] || STATUS_COLORS[resultData.status as keyof typeof STATUS_COLORS];
 
@@ -63,20 +71,37 @@ export function CurrentTimeStatus() {
   return (
     <div className="glass-card-strong p-5 md:p-6 rounded-2xl w-full max-w-4xl mx-auto">
       {/* Top Section - Status & Time */}
-      <div className="flex flex-col md:flex-row items-center gap-6 justify-between border-b border-amber-500/20 pb-5 mb-5">
-        <div className="flex flex-col md:flex-row items-center gap-4 shrink-0 text-center md:text-left">
+      <div className="flex flex-col md:flex-row items-center justify-between border-b border-amber-500/20 pb-5 mb-5 gap-4">
+        {/* Left: Title */}
+        <div className="flex flex-col md:flex-row items-center gap-4 shrink-0 text-center md:text-left flex-1">
           <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0 border border-amber-500/20">
             <Clock className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <h3 className="text-white font-serif font-semibold text-lg tracking-tight">สถานะยามปัจจุบัน</h3>
+            <h3 className="text-white font-serif font-semibold text-lg tracking-tight">
+              {slotOffset === 0 ? "สถานะยามปัจจุบัน" : "สถานะยามที่เลือก"}
+            </h3>
             <p className="text-sm text-slate-400 mt-0.5">
               {dayName} • ยามที่ {slotId} ({timeSlot?.timeRange})
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Middle: Arrows */}
+        <div className="flex items-center justify-center gap-2 flex-1">
+          <button onClick={() => setSlotOffset(o => o - 1)} className="p-2 rounded-full bg-white/5 border border-white/10 hover:bg-amber-500/20 text-slate-300 hover:text-amber-400 hover:border-amber-500/40 transition-all shadow-sm">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button onClick={() => setSlotOffset(0)} className={`text-xs font-serif px-3 py-1.5 rounded-full border transition-all ${slotOffset === 0 ? 'bg-amber-500/20 border-amber-500/40 text-amber-400 font-medium shadow-[0_0_10px_rgba(217,119,6,0.2)]' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'}`}>
+            ปัจจุบัน
+          </button>
+          <button onClick={() => setSlotOffset(o => o + 1)} className="p-2 rounded-full bg-white/5 border border-white/10 hover:bg-amber-500/20 text-slate-300 hover:text-amber-400 hover:border-amber-500/40 transition-all shadow-sm">
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Right: Result */}
+        <div className="flex items-center gap-3 shrink-0 flex-1 justify-end">
           <div className="flex items-center gap-3 glass-card p-2.5 pr-4 rounded-xl border border-amber-500/30">
             <img src={getImageForStatus(status)} alt={thaiName} className="w-12 h-12 rounded-xl object-contain bg-white p-1 shadow-[0_0_10px_rgba(255,255,255,0.2)] ring-1 ring-white/30" />
             <div className="flex flex-col">
