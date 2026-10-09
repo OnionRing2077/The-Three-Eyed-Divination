@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadAuth = () => {
+    const loadAuth = async () => {
       try {
         // 1. ตรวจสอบหรือสร้าง Device ID
         let storedDeviceId = localStorage.getItem('deviceId');
@@ -28,8 +28,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setDeviceId(storedDeviceId);
 
-        // 2. โหลด Token เก่าถ้ามี
-        const storedToken = localStorage.getItem('userToken');
+        let storedToken = localStorage.getItem('userToken');
+
+        // Auto-login logic for Home Screen Web Apps (standalone)
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const k = params.get('k');
+          
+          if (k && !storedToken) {
+            try {
+              const res = await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ licenseKey: k, deviceId: storedDeviceId }),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                storedToken = data.token;
+                localStorage.setItem('userToken', storedToken);
+              }
+            } catch (err) {
+              console.error("Auto-login failed:", err);
+            }
+          }
+        }
+
         if (storedToken) setToken(storedToken);
       } catch (error) {
         console.error("Auth context error:", error);

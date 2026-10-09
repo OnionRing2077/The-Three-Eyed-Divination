@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     if (!license.isActive) return NextResponse.json({ error: 'License suspended' }, { status: 403 });
 
     let registeredDevices = license.registeredDevices || [];
-    const maxDevices = license.maxDevices || 1;
+    const maxDevices = license.maxDevices || 3;
 
     // ตรวจสอบ Device ID
     if (!registeredDevices.includes(deviceId)) {

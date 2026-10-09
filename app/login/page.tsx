@@ -32,7 +32,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         login(data.token);
-        router.push('/');
+        router.push('/?k=' + encodeURIComponent(licenseKey));
       } else {
         if (data.needsTransfer) {
            setError('อุปกรณ์ที่ใช้งานครบกำหนดแล้ว กรุณาติดต่อแอดมิน');
