@@ -44,8 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               });
               if (res.ok) {
                 const data = await res.json();
-                storedToken = data.token;
-                localStorage.setItem('userToken', storedToken);
+                if (data.token) {
+                  storedToken = data.token;
+                  localStorage.setItem('userToken', data.token);
+                }
               }
             } catch (err) {
               console.error("Auto-login failed:", err);
