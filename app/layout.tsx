@@ -28,7 +28,12 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "จับยามสามตา | The Three-Eyed Divination",
-  description: "คำนวณยามสามตาจากวัน เวลา หมวดเรื่อง และเพศ",
+  description: "ค้นหาฤกษ์ยามและจังหวะเวลาที่เหมาะสมด้วยศาสตร์โหราศาสตร์พม่าโบราณ",
+  openGraph: {
+    title: "จับยามสามตา | The Three-Eyed Divination",
+    description: "ค้นหาฤกษ์ยามและจังหวะเวลาที่เหมาะสมด้วยศาสตร์โหราศาสตร์พม่าโบราณ",
+    type: "website",
+  }
 };
 
 import { AuthProvider } from '@/contexts/AuthContext';
