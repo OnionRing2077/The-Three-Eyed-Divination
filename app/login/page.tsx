@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Key } from 'lucide-react';
@@ -9,8 +9,14 @@ export default function LoginPage() {
   const [licenseKey, setLicenseKey] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, deviceId } = useAuth();
+  const { login, deviceId, token, isLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && token) {
+      router.push('/');
+    }
+  }, [token, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +52,15 @@ export default function LoginPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading || token) {
+    return (
+      <div className="fixed inset-0 h-screen w-screen bg-[#0f0c29] flex flex-col items-center justify-center p-4">
+        <div className="w-16 h-16 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></div>
+        <p className="text-amber-400 mt-6 font-serif text-xl animate-pulse">กำลังเข้าสู่ระบบ...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 h-screen w-screen bg-[#0f0c29] flex flex-col items-center justify-center p-4 overflow-hidden">
